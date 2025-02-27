@@ -86,7 +86,7 @@ public class Exercise0 {
 			int x = scanner.nextInt();
 						
 			for (int val : values) {
-				if(val == x) {
+				if (val == x) {
 					writer.println(x);
 				}
 			}
