@@ -1,0 +1,174 @@
+package types;
+
+import java.util.Arrays;
+import java.util.Random;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import org.junit.platform.commons.util.StringUtils;
+
+/**
+ * 
+ */
+public class Mastermind {
+
+	public static final int MAX_TRIALS = 20;
+	private static Random random;
+	
+	private int numTrials = 0;
+	private int size;
+	private int score = 0;
+	private Code genCode;
+	private Code[] trials = new Code[10];
+
+	private boolean[] found; // really shitty solution but this is the best i can think of given this shitty code structure.
+	/**
+	 * 
+	 */
+	public static String EOL = System.lineSeparator();
+
+
+
+	/**
+	 * 
+	 * @param seed
+	 * @param size
+	 * @param colours
+	 */
+	public Mastermind (int seed, int size, Colour[] colours) {
+		Mastermind.random = new Random(seed);
+		this.size = size;
+		this.found = new boolean[size];
+		
+		this.startNewRound();
+	}
+	
+	
+	/**
+	 * Resets score and generates new code.
+	 */
+	public void startNewRound() {
+		this.numTrials = 0;
+		this.score = 0;
+		Arrays.fill(found, false);
+		
+		Colour[] colours = Colour.values();
+		Colour[] randCode = new Colour[this.size];
+		
+		for (int i = 0; i < randCode.length; i++) {
+			randCode[i] = colours[Mastermind.random.nextInt(colours.length)];
+		}
+		
+		this.genCode = new Code(randCode);
+	}
+
+	/**
+	 * 
+	 * @param trial
+	 */
+	public void play(Code trial) {
+		int index = getTrialIndex(trial);
+		this.trials[index] = trial.copy();
+		
+		for (int i = 0; i < trial.getLength(); i++) {
+			if (trial.getCode()[i] == this.genCode.getCode()[i]) {
+				found[i] = true;
+			}
+		}
+		
+		if (this.wasSecretRevealed()) {
+			this.updateScore();
+		}
+		
+		this.numTrials++;	
+	}
+	
+
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean wasSecretRevealed() {
+		for (boolean val: this.found) {
+			if(!val) return false;
+		}
+		
+		return true;
+	}
+	
+
+	/**
+	 * 
+	 * @return
+	 */
+	public int getNumberOfTrials() {
+		return this.numTrials;
+	}
+
+
+	/**
+	 * 
+	 * @return
+	 */
+	public int score() {
+		return this.score;
+
+	}
+
+	
+	/**
+	 * 
+	 */
+	public void updateScore() {
+		this.score += 50;
+	}
+
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean isRoundFinished() {
+		return this.getNumberOfTrials() >= MAX_TRIALS || wasSecretRevealed();
+	}
+
+
+	@Override
+	public String toString() { // might not be the best solution but oh well.
+		StringBuilder builder = new StringBuilder(this.genCode.toString() + "\n\n");
+		
+		if (!this.wasSecretRevealed()) {
+			for (int i = 0; i < this.genCode.getLength(); i++) {
+					builder.replace(i*3 + 1, i*3 + 2, "?");
+			}	
+		}
+		
+		// prepends score and number of trials
+		builder.insert(0, "Number of Trials = " + this.numTrials + "\nScore = " + this.score + "\n");
+		
+		for (Code c : this.trials) {
+			if (c == null) break;
+			
+			int[] results = c.howManyCorrect(this.genCode);
+			builder.append(c.toString() + "\t" + results[0] + " " + results[1] + "\n");
+		}		
+		
+		return builder.toString();
+	}
+	
+	
+	private int getTrialIndex(Code code) {
+		if (this.numTrials == 0) return 0;
+		int index;
+		
+		for () {
+			
+		}
+		
+		return code.equalCodes(this.trials[(numTrials - 1) % 10]) ? (numTrials - 1) % 10 : numTrials % 10;
+	}
+
+}

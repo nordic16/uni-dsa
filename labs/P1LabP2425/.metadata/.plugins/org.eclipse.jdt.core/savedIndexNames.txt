@@ -1,0 +1,20 @@
+INDEX VERSION 1.134+/Users/xkyfal/Documents/programming/uni-dsa/labs/P1LabP2425/.metadata/.plugins/org.eclipse.jdt.core
+3895179674.index
+881421804.index
+1215460578.index
+2545227973.index
+1566456695.index
+1301189507.index
+3640378357.index
+706228892.index
+2334185957.index
+2207280887.index
+1246193129.index
+3758220802.index
+3865692598.index
+1200299505.index
+1865797976.index
+1031118133.index
+1715671655.index
+4091702570.index
+316834937.index

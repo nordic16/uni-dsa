@@ -1,0 +1,34 @@
+package main;
+
+import types.Code;
+import types.Colour;
+import types.Mastermind;
+
+public class Main1 {
+
+	public static void main(String[] args) {
+		Colour[] binario = Colour.values();
+
+		Mastermind jogo = new Mastermind(0, 6, binario);
+
+		Colour[]trial = new Colour[6];
+
+		trial[0] = Colour.BLUE;
+		trial[1] = Colour.BLUE;
+		trial[2] = Colour.BLUE;
+		trial[3] = Colour.BLUE;
+		trial[4] = Colour.BLUE;
+		trial[5] = Colour.BLUE;
+
+		Code tentativa = new Code(trial);
+		
+		for (int i = 1; i <= Mastermind.MAX_TRIALS; i++) {
+			jogo.play(tentativa);
+		}
+		
+		boolean expected = true;
+
+		boolean actual = jogo.isRoundFinished();
+	}
+
+}

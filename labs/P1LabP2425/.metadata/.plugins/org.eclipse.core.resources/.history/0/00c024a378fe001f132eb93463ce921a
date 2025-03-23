@@ -1,0 +1,30 @@
+package main;
+
+import types.Code;
+import types.Colour;
+import types.Mastermind;
+
+public class Main1 {
+
+	public static void main(String[] args) {
+		Colour[] multicolour = Colour.values();
+
+		Mastermind jogo = new Mastermind(0, 6, multicolour);
+
+		Colour[] trial = new Colour[6];
+		trial[0] = Colour.BLUE;
+		trial[1] = Colour.PINK;
+		trial[2] = Colour.RED;
+		trial[3] = Colour.ORANGE;
+		trial[4] = Colour.ORANGE;
+		trial[5] = Colour.ORANGE;
+
+		Code tentativa = new Code(trial);
+		
+		jogo.play(tentativa);
+		
+
+		System.out.println(jogo.toString());		
+	}
+
+}

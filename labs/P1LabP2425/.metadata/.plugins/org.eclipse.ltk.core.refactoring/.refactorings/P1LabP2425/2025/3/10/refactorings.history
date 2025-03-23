@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename field &apos;numAttempts&apos; in &apos;types.Mastermind&apos; to &apos;numTrials&apos;&#x0A;- Original project: &apos;P1LabP2425&apos;&#x0A;- Original element: &apos;types.Mastermind.numAttempts&apos;&#x0A;- Renamed element: &apos;types.Mastermind.numTrials&apos;&#x0A;- Update references to refactored element&#x0A;- Update textual occurrences in comments and strings" delegate="false" deprecate="false" description="Rename field &apos;numAttempts&apos;" flags="589826" getter="false" id="org.eclipse.jdt.ui.rename.field" input="/src&lt;types{Mastermind.java[Mastermind^numAttempts" name="numTrials" references="true" setter="false" stamp="1741187595794" textual="false" version="1.0"/>
+</session>
