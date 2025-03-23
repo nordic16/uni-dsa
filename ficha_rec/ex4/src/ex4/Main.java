@@ -2,7 +2,7 @@ package ex4;
 
 public class Main {
 	public static void main(String[] args) {
-		String p = "abc";
+		String p = "abcdef";
 		System.out.println(reverse(p, 0));
 	}
 	
