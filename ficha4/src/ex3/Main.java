@@ -8,7 +8,7 @@ public class Main {
         e.push(2);
         e.push(4);
 
-        System.out.println(e.toString());
+        System.out.println(e);
         System.out.println(e.size());
     }
 }
