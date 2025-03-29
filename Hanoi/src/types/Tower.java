@@ -1,6 +1,9 @@
 package types;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Spliterators;
 
 public class Tower {
     
@@ -9,6 +12,7 @@ public class Tower {
 
     private final int height;
     private ArrayStack<Disk> disks = new ArrayStack<>();
+    private int numberOfDisks = 0;
 
     /**
      * 
@@ -30,9 +34,10 @@ public class Tower {
      * @param d
      */
     public void addToTower(Disk d) {
-        if (isValidMove(d)) {
+        //if (isValidMove(d)) {
             disks.push(d);
-        }
+            numberOfDisks++;
+        //}
     }
 
     /**
@@ -47,6 +52,10 @@ public class Tower {
      * @requires: !isEmpty()
      */
     public void removeFromTower() {
+        if (numberOfDisks > 0) {
+            numberOfDisks--;
+        }
+
         disks.pop();
     }
 
@@ -57,7 +66,7 @@ public class Tower {
      * @return
      */
     public boolean isValidMove(Disk d) {
-        return disks.peek().isLargerThan(d) && this.numberOfDisks() < this.height;
+        return disks.isEmpty() || (disks.peek().isLargerThan(d) && this.numberOfDisks() < this.height);
     }
 
     /**
@@ -86,20 +95,23 @@ public class Tower {
 
     /**
      * 
-     * @return
+     * @return numberOfDisks
      */
     public int numberOfDisks() {
-        int i = 0;
-
-        for (Iterator<Disk> current = disks.iterator(); current.hasNext(); i++) {
-            current.next();
-        }
-
-        return i;
+        return numberOfDisks;
     }
 
     @Override
     public String toString() {
-        return disks.toString();
+        StringBuilder sb = new StringBuilder();
+        Iterator<Disk> iter = disks.iterator();
+
+        // appends | if needed.
+        sb.append("|\n".repeat(Math.max(0, height - numberOfDisks)));
+
+        while (iter.hasNext()) {
+            sb.append(iter.next()).append(EOL);
+        }
+        return sb.append("_").toString();
     }
 }
