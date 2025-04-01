@@ -1,9 +1,6 @@
 package types;
 
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Spliterators;
 
 public class Tower {
     
@@ -11,19 +8,15 @@ public class Tower {
     public static final int DEFAULT_HEIGHT = 8; 
 
     private final int height;
-    private ArrayStack<Disk> disks = new ArrayStack<>();
+    private final ArrayStack<Disk> disks = new ArrayStack<>();
     private int numberOfDisks = 0;
 
-    /**
-     * 
-     */
     public Tower() {
         this.height = DEFAULT_HEIGHT;
     }
 
     /**
-     * 
-     * @param height
+     * @param height: altura da torre
      * @requires: height >= 3
      */
     public Tower(int height) {
@@ -31,46 +24,48 @@ public class Tower {
     }
 
     /**
-     * @param d
+     * @param d: disco a adicionar
+     * @requires: !isFull()
+     * @ensures disco e adicionado ao topo da pilha
      */
     public void addToTower(Disk d) {
-        //if (isValidMove(d)) {
+        if (isValidMove(d)) {
             disks.push(d);
             numberOfDisks++;
-        //}
+        }
     }
 
     /**
      * 
-     * @return
+     * @return se a torre está cheia
      */
     public boolean isFull() {
         return this.height == this.numberOfDisks();
     }
 
     /**
-     * @requires: !isEmpty()
+     * @requires !isEmpty()
      */
     public void removeFromTower() {
         if (numberOfDisks > 0) {
             numberOfDisks--;
         }
-
         disks.pop();
     }
 
     /**
      * 
      * @param d: disco a inserir
-     * @requires: !isEmpty()
-     * @return
+     * @requires !isEmpty()
+     * @ensures !isFull()
+     * @return se a jogada é valida.
      */
     public boolean isValidMove(Disk d) {
-        return disks.isEmpty() || (disks.peek().isLargerThan(d) && this.numberOfDisks() < this.height);
+        return disks.isEmpty() || (disks.peek().isLargerThan(d) && !isFull());
     }
 
     /**
-     * 
+     * @requires !isEmpty()
      * @return disco no topo da torre.
      */
     public Disk viewTopDisk() {
@@ -87,7 +82,7 @@ public class Tower {
 
     /**
      * 
-     * @return
+     * @return altura da torre
      */
     public int height() {
         return height;
@@ -95,7 +90,7 @@ public class Tower {
 
     /**
      * 
-     * @return numberOfDisks
+     * @return numero de discos
      */
     public int numberOfDisks() {
         return numberOfDisks;

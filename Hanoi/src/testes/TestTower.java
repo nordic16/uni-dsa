@@ -13,9 +13,9 @@ public class TestTower {
 
     private static final String EOL = System.lineSeparator();
 
-    private Disk smallDisk = new Disk(1);
-    private Disk mediumDisk = new Disk(3);
-    private Disk largeDisk = new Disk(5);
+    private final Disk smallDisk = new Disk(1);
+    private final Disk mediumDisk = new Disk(3);
+    private final Disk largeDisk = new Disk(5);
 
     @Test
     void test1() {

@@ -6,31 +6,33 @@ public class HanoiGame {
 
     private final int numberOfRods;
     private final int numberOfDisks;
-    private Tower[] towers;
+    private final Tower[] towers;
     private int moves = 0;
 
     // used to check if game is finished.
+    // there is another solution, but it'd require looping through every single tower
+    // in search of one that is full.
     private Tower latest = null;
 
     /**
-     * 
-     * @param numberOfRods
-     * @param numberOfDisks
+     *
+     * @param numberOfRods: numero de torres
+     * @param numberOfDisks: numero de discos
      *
      * @requires: numberOfRods >= 3
      */
     public HanoiGame(int numberOfRods, int numberOfDisks) {
         this.numberOfDisks = numberOfDisks;
         this.numberOfRods = numberOfRods;
-
         this.towers = new Tower[numberOfRods];
         initializeGame();
     }
 
     /**
-     * 
-     * @param from
-     * @param to
+     * Realiza uma jogada, incrementando moves.
+     *
+     * @param from: torre onde disco e retirado
+     * @param to: torre em que o disco sera inserido
      */
     public void play(int from, int to) {
         Tower f = towers[from];
@@ -68,7 +70,7 @@ public class HanoiGame {
         String[][] towersString = new String[numberOfRods][numberOfDisks];
 
         for (int i = 0; i < towersString.length; i++) {
-            towersString[i] = towers[i].toString().split("\n");
+            towersString[i] = towers[i].toString().split(EOL);
         }
 
         // print one row at a time.
@@ -76,17 +78,18 @@ public class HanoiGame {
             sb.append("  ");
             for (int j = 0; j < numberOfRods; j++) {
                 sb.append(towersString[j][i]);
-                if (j < numberOfRods - 1) { // probably sucks.
-                    sb.append("    ");
-                }
+                sb.repeat(" ", j < numberOfRods - 1 ? 4 : 2);
             }
-            sb.append("  " + EOL);
+            sb.append(EOL);
         }
         sb.repeat("-", 5 * numberOfRods);
         return sb.toString().trim();
     }
 
-
+    /**
+     * Utilizado para inicializar o jogo.
+     * @ensures primeira torre é preencida com discos sucessivamente menores.
+     * */
     private void initializeGame() {
         for (int i = 0; i < numberOfRods; i++) {
             towers[i] = new Tower(numberOfDisks);
