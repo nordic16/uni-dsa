@@ -17,7 +17,7 @@ public interface Stack<E> {
     /**
      * Inserir um elemento no topo da pilha
      * 
-     * @param item O elemento a inserir
+     * @param e O elemento a inserir
      */
     void push(E e);
 

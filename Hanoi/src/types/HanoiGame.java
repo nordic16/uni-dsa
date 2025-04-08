@@ -1,5 +1,9 @@
 package types;
 
+
+/**
+ * @author Diogo Domingos, 61887
+ * */
 public class HanoiGame {
 
     public static final String EOL = System.lineSeparator();
@@ -83,7 +87,7 @@ public class HanoiGame {
             sb.append(EOL);
         }
         sb.repeat("-", 5 * numberOfRods);
-        return sb.toString().trim();
+        return sb.toString();
     }
 
     /**

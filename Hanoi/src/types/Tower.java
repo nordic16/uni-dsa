@@ -102,7 +102,7 @@ public class Tower {
         Iterator<Disk> iter = disks.iterator();
 
         // appends | if needed.
-        sb.append("|\n".repeat(Math.max(0, height - numberOfDisks)));
+        sb.append("|\n".repeat(height - numberOfDisks));
 
         while (iter.hasNext()) {
             sb.append(iter.next()).append(EOL);
