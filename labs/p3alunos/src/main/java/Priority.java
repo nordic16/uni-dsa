@@ -10,16 +10,4 @@ package main.java;
 public enum Priority {
     NORMAL,
     HIGH;
-	
-	
-	
-	public static Priority fromString(String p) {
-		if (p.equalsIgnoreCase("high")) {
-			return HIGH;
-		
-		} else {
-			return NORMAL;
-		
-		} 
-	}
 }

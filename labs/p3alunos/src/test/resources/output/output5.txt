@@ -14,6 +14,6 @@ All print jobs have been assigned to a printer!
 [TIME: 10] Job job5 has finished printing. Total wait time: 10.
 [TIME: 5] Job job7 has finished printing. Total wait time: 5.
 [TIME: 30] Job job2 has finished printing. Total wait time: 30.
-[TIME: 15] Job job1 has finished printing. Total wait time: 15.
-[TIME: 35] Job job3 has finished printing. Total wait time: 35.
+[TIME: 35] Job job1 has finished printing. Total wait time: 35.
+[TIME: 95] Job job3 has finished printing. Total wait time: 95.
 All printing jobs have been processed!

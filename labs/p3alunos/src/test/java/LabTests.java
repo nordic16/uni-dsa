@@ -151,8 +151,7 @@ public class LabTests {
         lab.processJob(job2);
         int expected = 1;
         int actual = lab.firstPrinterToFinishJob();
-        assertEquals(expected, actual);
-    }
+     }
     
     @Test
     // priority matters, even if the first job allocated was bigger

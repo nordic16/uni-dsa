@@ -21,11 +21,10 @@ public class Printer {
      * @param sb
      */
     public Printer(int printerId, StringBuilder sb) {
-        this.printerId = printerId;
-        this.buf = sb;
-
-        this.highQueue = new ArrayQueue<>();
-        this.normalQueue = new ArrayQueue<>();
+    	this.printerId = printerId;
+    	this.buf = sb;
+    	this.highQueue = new ArrayQueue<Job>();
+    	this.normalQueue = new ArrayQueue<Job>();
     }
 
     /**
@@ -59,24 +58,20 @@ public class Printer {
     public int timeToFinishNormal() {
         return timeToFinishNormal;
     }
-    
-    public void setCurrentTime(int time) {
-    	this.currentTime = time;
-    }
 
     /**
      * 
      * @param job
      */
     public void addJob(Job job) {
-        if (job.getPriority() == Priority.HIGH) {
-        	timeToFinishHigh += job.getModelPrintTime() * job.getNumberCopies();
-        	highQueue.enqueue(job);
-        } else {
-        	normalQueue.enqueue(job);
-        	timeToFinishNormal += job.getModelPrintTime() * job.getNumberCopies();
-        }
-        
+    	job.setStatus(Status.WAITING);
+    	if (job.getPriority() == Priority.HIGH) {
+    		highQueue.enqueue(job);
+    		timeToFinishHigh += job.getPrintingDuration();
+    	} else {
+    		normalQueue.enqueue(job);
+    		timeToFinishNormal += job.getPrintingDuration();
+    	}
     }
 
     /**
@@ -88,17 +83,37 @@ public class Printer {
     }
 
     /**
-     * 
      * @param duration
      */
     public void printCurrentJob(int duration) {
+    	int i;
+    	int initialDuration = duration;
     	Job job = currentJob();
-        assert(duration <= job.getModelPrintTime());
-        
-        timeToFinishHigh -= duration;
-        timeToFinishNormal -= duration;
+    	assert(duration <= job.getPrintingDuration());
+    	
+		currentTime += initialDuration;
+		
+		// note: finishCurrentJob() does NOT manipulate any time variables in any way.
+		if (job.getPriority() == Priority.HIGH) {
+    		timeToFinishHigh -= initialDuration;
+		} else {
+			timeToFinishNormal -= initialDuration;
+		}
+    	
+    	// calculates how many copies can be printed out before @duration.
+    	for (i = 0; duration - job.getModelPrintTime() >= 0 && i < job.getNumberCopies(); i++) {	
+    		duration -= job.getModelPrintTime();
+    	}
+    	
+    	job.setPrintingDuration(job.getPrintingDuration() - job.getModelPrintTime()*i);
+    	if (i < job.getNumberCopies()) { // job not finished yet...
+    		// append copy left halfway printed.
+    		int remaining = job.getModelPrintTime() - duration;
+    		job.setPrintingDuration(job.getPrintingDuration() - remaining);
 
-        currentTime += duration;
+    	} else {
+    		finishCurrentJob();
+    	}
     }
 
     /**
@@ -106,21 +121,16 @@ public class Printer {
      */
     public void finishCurrentJob() {
     	Job job = currentJob();
-    	if (job != null) {
-    		job.setStatus(Status.FINISHED);
-    		currentTime += job.getModelPrintTime();
-    		buf.append(String.format("[TIME: %d] Job %s has finished printing. Total wait time: %d.%s", currentTime, job.getModelName(), currentTime - job.getArrivalTime(), EOL));
-
-    		if (job.getPriority() == Priority.HIGH) {
-    			highQueue.dequeue();
-            	timeToFinishHigh -= job.getModelPrintTime() * job.getNumberCopies();
-    		
-    		} else {
-            	timeToFinishNormal -= job.getModelPrintTime() * job.getNumberCopies();
-    			normalQueue.dequeue();
-    		}
-    		job.setPrintingDuration(0);
+    	job.setStatus(Status.FINISHED);
+    	
+    	// can't use getPrintingDuration because that was changed previously.
+    	
+    	if (job.getPriority() == Priority.HIGH) {
+    		highQueue.dequeue();
+    	} else {
+    		normalQueue.dequeue();
     	}
+    	buf.append(String.format("[TIME: %d] Job %s has finished printing. Total wait time: %d.%s", currentTime, job.getModelName(), currentTime - job.getArrivalTime(), EOL));
     }
 
     /**
@@ -128,7 +138,7 @@ public class Printer {
      * @return
      */
     public boolean isEmpty() {
-        return normalQueue.isEmpty() && highQueue.isEmpty();
+    	return highQueue.isEmpty() && normalQueue.isEmpty();
     }
 
     /**
@@ -136,41 +146,31 @@ public class Printer {
      * @param duration
      */
     public void printForDuration(int duration) {
-    	int initialDuration = duration;
+    	int projectedTime = currentTime + duration;
     	Job job = currentJob();
-    
-    	while (job != null) {
-    		job = currentJob();
-    		
-    		int i;
-    		for (i = 0; i < job.getNumberCopies() && duration - job.getModelPrintTime() > 0; i++) {
-    			duration -= job.getModelPrintTime();
-    		}
-    		
-    		// copies left.
-    		if (duration - (job.getNumberCopies() - i)*job.getModelPrintTime() < 0) {
-    			job.setPrintingDuration((job.getNumberCopies() - i)*job.getModelPrintTime() - duration);
-    			break;
-    		
-    		} else {
-    			finishCurrentJob();
-    		}
-    		
-    		
-    	}
-    	
-    	// if there's still a job to be handled.
     	if (job != null) {
-    		if (job.getPriority() == Priority.HIGH) {
-    			timeToFinishHigh -= duration;
-    		} else {
-        		timeToFinishNormal -= duration;
-    		}
-    		
-    		job.setPrintingDuration(job.getModelPrintTime() - duration);
-    	}
-    	currentTime += initialDuration;
-    	
+    		while (currentTime < projectedTime && currentJob() != null) {
+    			int delta = 0;
+    			// prevents assertion error...
+    			if (job.getPrintingDuration() + currentTime <= projectedTime) {
+    				delta = job.getPrintingDuration();
+    			} else {
+    				delta = projectedTime - currentTime;
+    			}
+    			
+				int remainder = duration - job.getPrintingDuration();
+				printCurrentJob(delta);
+    			
+    			job = currentJob();
+    			
+    			// important: if next job is null, extra time must be added, since otherwise it'd be ignored.
+    			if (job == null && remainder > 0) {
+    				currentTime += remainder;
+    			}
+    	    }
+    	} else {
+        	currentTime += duration;
+    	}    	
     }
 
     /**
@@ -178,9 +178,7 @@ public class Printer {
      * @param time
      */
     public void printUntilTime(int time) {
-    	while (currentTime < time) {
-    		printForDuration(time);
-    	}
-        
+    	assert(time >= currentTime);
+    	printForDuration(time - currentTime);
     }
 }

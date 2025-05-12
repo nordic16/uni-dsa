@@ -1,6 +1,7 @@
 package main.java;
 
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.io.File;
 
@@ -22,64 +23,117 @@ public class Lab {
         initializePrinters();
     }
 
-    
-    /** 
-     * Helper para inicializar as impressoras dum laboratorio.
-     * @ensures printers != null
-     * */
     private void initializePrinters() {
-        try(Scanner sc = new Scanner(new File(inputFile))) {
-            int n = sc.nextInt();
-            this.printers = new Printer[n];
+		try(Scanner sc = new Scanner(new File(inputFile))) {
+			int n = sc.nextInt();
+			printers = new Printer[n];
+			
+			for (int i = 0; i < n; i++) {
+				printers[i] = new Printer(i, buf);
+				buf.append(String.format("[TIME: 0] Printer %d online, ready to take jobs.%s", i, EOL));
+			}
+			
+		} catch (FileNotFoundException e) {
+			
+		}
+		
+	}
 
-            for (int i = 0; i < n; i++) {
-                printers[i] = new Printer(i, buf);
-                buf.append(String.format("[TIME: 0] Printer %d online, ready to take jobs.%s", i, EOL));
-            }
-        } 
-        catch (FileNotFoundException e) {
-        	e.printStackTrace();
-        }
-    }
-
-    /**
+	/**
      * 
      * @param inputFile
      * @throws FileNotFoundException
      */
     public void takeOrders(String inputFile) throws FileNotFoundException {
-        try (Scanner sc = new Scanner(new File(inputFile))) {
+    	try(Scanner sc = new Scanner(new File(inputFile))) {
+        	int prevTime = 0; // keeping track of previous arrival time
         	while (sc.hasNextLine()) {
         		String[] splt = sc.nextLine().split(" ");
-        		Job job = new Job(splt[2], Integer.parseInt(splt[3]), Integer.parseInt(splt[4]), Integer.parseInt(splt[0]), Priority.fromString(splt[5])); // ts pmo
-            	updateCurrentTime(job.getArrivalTime());
-
+        		Job job = new Job(splt[2], Integer.parseInt(splt[3]), Integer.parseInt(splt[4]), Integer.parseInt(splt[0]), priorityFromString(splt[5]));	
+        		
+        		if (job.getArrivalTime() != prevTime) {
+    				syncPrinters(job.getArrivalTime());
+    				prevTime = job.getArrivalTime();
+        		}
         		processJob(job);
         	}
-        	buf.append("All print jobs have been assigned to a printer!" + EOL);
         }
+        buf.append("All print jobs have been assigned to a printer!" + EOL);
         
-        while (!isPrintingFinished()) {        	
-        	Printer n = printers[firstPrinterToFinishJob()];
+        // flushes out remaining jobs.
+        while (!isPrintingFinished()) {
+        	int n = firstPrinterToFinishJob();
+        	int duration = printers[n].currentJob().getPrintingDuration();
+        	printers[n].printCurrentJob(duration);
         	
-        	n.finishCurrentJob();
+        	// needs to update all the other printers as well....
         }
         
+        buf.append("All printing jobs have been processed!");
+    }
     
-        
-    	buf.append("All printing jobs have been processed!");
+
+	private boolean isValueIn(int n, int[] vals) {
+		for (int i : vals) {
+			if (n == i) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	private void syncPrinters(int duration) {
+		// sync all printers in the right order.
+		final int[] alreadySynced = new int[printers.length];
+		Arrays.fill(alreadySynced, -1);
+				
+		// first printer is a bit of a special case.
+		final int first = firstPrinterToFinishJob(); // needed.
+		printers[first].printUntilTime(duration);
+		alreadySynced[0] = first;
+		
+		for (int i = 1; i < alreadySynced.length; i++) {
+			final int n = findnThPrinterToFinishJob(alreadySynced);
+			printers[n].printUntilTime(duration);
+			alreadySynced[i] = n;
+		}
+	}
+	
+	/** 
+	 * @param excluded: values excluded from comparison.
+	 * */
+	private int findnThPrinterToFinishJob(int[] excluded) {
+		int lg = 0;
+		
+		while (isValueIn(lg, excluded)) {
+			lg++;
+		}
+		
+		for (int i = 0; i < printers.length; i++) {
+			if (printers[i].isEmpty() || isValueIn(i, excluded)) {
+				continue;
+			
+			} else if (printers[i].currentJob().getPrintingDuration() < printers[lg].currentJob().getPrintingDuration()) {
+				lg = i;
+			}
+		}
+		
+		return lg;
+	}
+
+	private static Priority priorityFromString(String s) {
+    	return s.equalsIgnoreCase("HIGH") ? Priority.HIGH : Priority.NORMAL;
     }
 
     /**
      * 
      * @param job
      */
-    public void processJob(Job job) {   
+    public void processJob(Job job) {  
     	int n = job.getPriority() == Priority.HIGH ? firstPrinterToFinishHigh() : firstPrinterToFinish();
-    	printers[n].addJob(job);
-    	
-    	System.out.println(String.format("[TIME: %d] Job %s (%s) scheduled to printer %d, printing will take %d.%s", job.getArrivalTime(), job.getModelName(), job.getPriority().toString(), n, job.getModelPrintTime(), EOL));
-        buf.append(String.format("[TIME: %d] Job %s (%s) scheduled to printer %d, printing will take %d.%s", job.getArrivalTime(), job.getModelName(), job.getPriority().toString(), n, job.getPrintingDuration(), EOL));
+		printers[n].addJob(job);
+		buf.append(String.format("[TIME: %d] Job %s (%s) scheduled to printer %d, printing will take %d.%s", job.getArrivalTime(), job.getModelName(), job.getPriority(), printers[n].getPrinterId(), job.getPrintingDuration(), EOL));
     }
 
     /**
@@ -87,15 +141,17 @@ public class Lab {
      * @return
      */
     public int firstPrinterToFinish() {
-    	int lg = 0;
-        for (int i = 1; i < printers.length; i++) {
-        	int totalI = printers[i].timeToFinishNormal() + printers[i].timeToFinishHigh();
-        	int totalLg = printers[lg].timeToFinishNormal() + printers[lg].timeToFinishHigh();
-        	if (totalI < totalLg) {
-        		lg = i;
-        	}
-        }
-        return lg;
+    	int n = 0;
+    	
+    	for (int i = 1; i < printers.length; i++) {
+    		int timeI = printers[i].timeToFinishHigh() + printers[i].timeToFinishNormal();
+    		int timeN = printers[n].timeToFinishHigh() + printers[n].timeToFinishNormal();
+    		
+    		if (timeI < timeN) {
+    			n = i;
+    		}
+    	}
+    	return n;	
     }
 
     /**
@@ -104,42 +160,32 @@ public class Lab {
      */
     public int firstPrinterToFinishHigh() {
     	int n = 0;
-        for (int i = 1; i < printers.length; i++) {        	
-        	if (printers[i].timeToFinishHigh() < printers[n].timeToFinishHigh()) {
-        		n = i;
-        	} else if (printers[i].timeToFinishHigh() == printers[n].timeToFinishHigh()) {
-        		n = firstPrinterToFinish();
-        	}
-        }
-        
-        return n;
+    	boolean draw = false;
+
+    	for (int i = 1; i < printers.length; i++) {    		
+    		if (printers[i].timeToFinishHigh() < printers[n].timeToFinishHigh()) {
+    			draw = false;
+    			n = i;
+    		
+    		} else if (printers[i].timeToFinishHigh() == printers[n].timeToFinishHigh()) {
+    			draw = true;
+    		}
+    	}
+    	return draw ? firstPrinterToFinish() : n;
     }
 
     
     public int firstPrinterToFinishJob() {
-    	int n = 0;
-  
-    	if (isPrintingFinished()) {
-    		return 0;
+    	int n = firstNonEmptyPrinter();
+    	
+    	for (int i = n+1; i < printers.length; i++) {
+    		Job job = printers[i].currentJob();
+    		Job nJob = printers[n].currentJob();
+    		if (job != null && job.getPrintingDuration() < nJob.getPrintingDuration()) {
+    			n = i;
+    		}
     	}
     	
-    	for (int i = 0; i < printers.length; i++) {
-    		while (printers[n].currentJob() == null) {
-    			n++;
-    		}
-    		
-    		if (printers[i].currentJob() == null) {
-    			continue;
-    		}
-  
-    		
-			Job jobi = printers[i].currentJob();
-			Job jobn = printers[n].currentJob();
-			
-			if (jobi.getPrintingDuration() < jobn.getPrintingDuration()) {
-				n = i;
-			}
-    	}
     	return n;
     }
 
@@ -156,15 +202,16 @@ public class Lab {
         return true;
     }
     
+    
     /** 
-     * Updates current time for all printers.
+     * Returns the first non-empty printer.
      * */
-    private void updateCurrentTime(int time) {
-    	for (int i = 0; i < printers.length; i++) {
-    		int n = firstPrinterToFinishJob();
-    		
-    		if (printers[n].currentJob() != null)
-    			printers[n].printUntilTime(time);
+    private int firstNonEmptyPrinter() {
+    	for (Printer p : printers) {
+    		if (!p.isEmpty()) {
+    			return p.getPrinterId();
+    		}
     	}
+    	return -1;
     }
 }
