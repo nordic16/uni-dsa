@@ -1,0 +1,36 @@
+ERRO: Nao foi possivel registar o funcionario ana
+ERRO: Nao foi possivel registar o funcionario bernardo
+ERRO: Nao foi possivel registar o funcionario carla
+ERRO: Nao foi possivel registar o funcionario diogo
+ERRO: Nao foi possivel registar o funcionario diogo
+ERRO: Nao foi possivel registar o funcionario elsa
+ERRO: Nao foi possivel registar o funcionario filipe
+ERRO: Nao foi possivel registar o funcionario gabriela
+ERRO: Nao foi possivel registar o funcionario hugo
+ERRO: Nao foi possivel atribuir lugar a ana
+ERRO: Nao foi possivel atribuir lugar a bernardo
+ERRO: Nao foi possivel atribuir lugar a carla
+ERRO: Nao foi possivel atribuir lugar a filipe
+ERRO: Nao foi possivel atribuir lugar a diogo
+NAO EXISTE LUGAR de estacionamento atribuido a ana
+NAO EXISTE LUGAR de estacionamento atribuido a elsa
+NAO EXISTE LUGAR de estacionamento atribuido a diogo
+ERRO: Nao foi possivel atribuir lugar a gabriela
+TOTAL de lugares atribuidos no escalao 1 : null
+TOTAL de lugares atribuidos no escalao 2 : null
+Pessoa diogo nao tem lugar atribuido
+TOTAL de lugares atribuidos no escalao 1 : null
+TOTAL de lugares atribuidos no escalao 2 : null
+ERRO: Nao foi possivel atribuir lugar a gabriela
+TOTAL de lugares atribuidos no escalao 1 : null
+TOTAL de lugares atribuidos no escalao 2 : null
+LUGAR de estacionamento nr.2 SEM DONO atribuido
+Lugar 2 nao atribuido
+TOTAL de lugares atribuidos: null
+NAO EXISTE LUGAR de estacionamento atribuido a ines
+LUGAR de estacionamento nr.1 SEM DONO atribuido
+LUGAR de estacionamento nr.2 SEM DONO atribuido
+LUGAR de estacionamento nr.3 SEM DONO atribuido
+LUGAR de estacionamento nr.4 SEM DONO atribuido
+LUGAR de estacionamento nr.5 SEM DONO atribuido
+LUGAR de estacionamento nr.6 SEM DONO atribuido
