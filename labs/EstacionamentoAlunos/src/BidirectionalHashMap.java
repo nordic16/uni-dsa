@@ -1,4 +1,5 @@
 import java.util.HashMap; //Dica
+import java.util.Set;
 
 /**
  * Tabela bidirecional.
@@ -83,6 +84,11 @@ public class BidirectionalHashMap<K, V> {
         return key;
     }
 
+    public Set<K> keySet() {
+        return map.keySet();
+    }
+
+
     /**
      * Retornar o tamanho da tabela (numero de pares chave-valor contidos)
      * @return o tamanho da tabela
@@ -91,4 +97,8 @@ public class BidirectionalHashMap<K, V> {
         return map.size();
     }
 
+    public V getOrDefault(K key, V d) {
+        V value = map.get(key);
+        return value == null ? d : value;
+    }
 }

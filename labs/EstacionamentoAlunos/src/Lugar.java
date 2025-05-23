@@ -16,7 +16,7 @@ public class Lugar {
     }
 
     public String obterNumero() {
-        return null;
+        return "%d".formatted(numero);
     }
 
     @Override
@@ -33,6 +33,6 @@ public class Lugar {
     }
 
     public String obterEscalao() {
-        return null;
+        return "%d".formatted(escalao);
     }
 }
