@@ -1,35 +1,34 @@
 public class Gestor {
-
-    // será necessário que todas as keys sejam inteiros?
-    private final BidirectionalHashMap<Funcionario, Integer> lugares; // funcionario -> numero
+    private final BidirectionalHashMap<Funcionario, Lugar> lugares; // funcionario -> Lugar
     private final BidirectionalHashMap<String, Integer> funcionarios; // nome -> escalao
-    private final BidirectionalHashMap<Integer, Integer> atribuidos; // escalao -> nº de atribuidos.
+    private final BidirectionalHashMap<Integer, Integer> lugaresAtribuidos; // escalao -> nº de lugaresAtribuidos.
+    private final BidirectionalHashMap<Integer, Integer> funcionariosAtribuidos; // escalao -> nº de funcionarios atribuidos;
 
     private final int nrEscaloes;
     private final int nrLugares;
     private final int estrategia;
 
     /**
-     * 
      * @param nrEscaloes
      * @param nrLugares
      * @param estrategia
      */
     public Gestor(int nrEscaloes, int nrLugares, int estrategia) {
+        this.funcionariosAtribuidos = new BidirectionalHashMap<>();
         this.lugares = new BidirectionalHashMap<>();
         this.funcionarios = new BidirectionalHashMap<>();
-        this.atribuidos = new BidirectionalHashMap<>();
+        this.lugaresAtribuidos = new BidirectionalHashMap<>();
         this.nrEscaloes = nrEscaloes;
         this.nrLugares = nrLugares;
         this.estrategia = estrategia;
     }
 
-    public String totalAtribuidos() {
+    public int totalAtribuidos() {
         int total = 0;
         for (int i = 1; i <= nrEscaloes; i++) {
-            total += atribuidos.getOrDefault(i, 0);
+            total += lugaresAtribuidos.getOrDefault(i, 0);
         }
-        return "%d".formatted(total);
+        return total;
     }
 
     public boolean registar(String nome, int escalao) {
@@ -49,33 +48,57 @@ public class Gestor {
             return false;
         }
 
-        final int firstPermissible = (nrEscaloes - escalao)*(nrLugares / nrEscaloes) + 1; // primeiro lugar permissivel para um dado escalao.
-        final int nextFirstPermissible = (nrEscaloes - escalao + 1)*(nrLugares / nrEscaloes) + 1;
-        int seat = firstPermissible + atribuidos.getOrDefault(escalao, 0);
+        // strategy 1 is pretty much this.
+        int spot = getFirstFreeSpot(escalao);
 
-        // caso não existam mais lugares disponiveis.
-        if (seat == nextFirstPermissible) {
+        // caso estrategia seja 1 e não existam lugares disponíveis...
+        if (spot == -1 && estrategia == 1) {
             return false;
         }
 
-        lugares.put(f, seat);
-        atribuidos.put(escalao, atribuidos.getOrDefault(escalao, 0) + 1);
+        if (estrategia == 2) {
+            if (spot == -1) {
+                escalao = menorEscalaoLivre(f.obterEscalao());
+                if (escalao == -1) { // nao ha escaloes <= max com lugares livres.
+                    return false;
+                }
+                spot = getFirstFreeSpot(escalao);
+            }
+        }
 
+        lugares.put(f, new Lugar(spot, escalao));
+        funcionariosAtribuidos.put(f.obterEscalao(), funcionariosAtribuidos.getOrDefault(f.obterEscalao(), 0)+1);
+        lugaresAtribuidos.put(escalao, lugaresAtribuidos.getOrDefault(escalao, 0) + 1);
         return true;
     }
 
-    public Funcionario obterDono(int numero) {
-        return lugares.getKey(numero);
+    private int menorEscalaoLivre(int max) {
+        for (int i = 1; i < max && i < nrEscaloes; i++) {
+            if (atribuidosNoEscalao(i) < nrLugares/nrEscaloes) {
+                return i;
+            }
+        }
+        return -1;
     }
 
-    public String atribuidosNoEscalao(int escalao) {
-        return atribuidos.getOrDefault(escalao, 0).toString();
+    public Funcionario obterDono(int numero) {
+        for (Funcionario f : lugares.keySet()) {
+            if (lugares.getValue(f).obterNumero() == numero) {
+                return f;
+            }
+        }
+
+        return null;
+    }
+
+    public int atribuidosNoEscalao(int escalao) {
+        return funcionariosAtribuidos.getOrDefault(escalao, 0);
     }
 
     public int obterNumero(String nome) {
         for (Funcionario f : lugares.keySet()) {
             if (f.obterNome().equals(nome)) {
-                return lugares.getValue(f);
+                return lugares.getValue(f).obterNumero();
             }
         }
         return -1;
@@ -84,11 +107,12 @@ public class Gestor {
     public Lugar removerAtribuicaoPorNome(String nome) {
         for (Funcionario f : lugares.keySet()) {
             if (f.obterNome().equalsIgnoreCase(nome)) {
-                int escalao = funcionarios.getValue(f.obterNome());
-                int lugar = lugares.removeByKey(f);
+                Lugar lugar = lugares.removeByKey(f);
+                int escalao = lugar.obterEscalao();
                 // 0 - 1 = -1, so default MUST be 1.
-                atribuidos.put(escalao, atribuidos.getOrDefault(escalao, 1) - 1);
-                return new Lugar(lugar, funcionarios.getValue(nome));
+                lugaresAtribuidos.put(escalao, lugaresAtribuidos.getOrDefault(escalao, 1) - 1);
+                funcionariosAtribuidos.put(f.obterEscalao(), funcionariosAtribuidos.getOrDefault(f.obterEscalao(), 1) - 1);
+                return lugar;
             }
         }
         return null;
@@ -98,15 +122,38 @@ public class Gestor {
         Lugar lugar = null;
 
         for (Funcionario f : lugares.keySet()) {
-            if (numero == lugares.getValue(f)) {
-                int escalao = funcionarios.getValue(f.obterNome());
-                lugar = new Lugar(numero, escalao);
-                lugares.removeByKey(f);
+            if (numero == lugares.getValue(f).obterNumero()) {
+                lugar = lugares.removeByKey(f);
+                int escalao = lugar.obterEscalao();
                 // 0 - 1 = -1, so default MUST be 1.
-                atribuidos.put(escalao, atribuidos.getOrDefault(escalao, 1) - 1);
+                funcionariosAtribuidos.put(f.obterEscalao(), funcionariosAtribuidos.getOrDefault(escalao, 1) - 1);
+                lugaresAtribuidos.put(escalao, lugaresAtribuidos.getOrDefault(escalao, 1) - 1);
                 break;
             }
         }
         return lugar;
+    }
+
+    /**
+     * Calcula o primeiro lugar permitido.
+     * */
+    private int calculateFirstPermissible(int escalao) {
+        return (nrEscaloes - escalao)*(nrLugares/nrEscaloes) + 1;
+    }
+
+
+    /**
+     * finds a discrepancy.
+     * */
+    private int getFirstFreeSpot(int escalao) {
+        int i = calculateFirstPermissible(escalao);
+        int max = i + (nrLugares/nrEscaloes);
+
+        for (; i < max; i++) {
+            if (!lugares.containsValue(new Lugar(i, escalao))) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

@@ -88,7 +88,6 @@ public class BidirectionalHashMap<K, V> {
         return map.keySet();
     }
 
-
     /**
      * Retornar o tamanho da tabela (numero de pares chave-valor contidos)
      * @return o tamanho da tabela

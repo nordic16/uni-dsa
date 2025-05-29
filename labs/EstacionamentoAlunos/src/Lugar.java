@@ -15,8 +15,8 @@ public class Lugar {
         this.escalao = escalao;
     }
 
-    public String obterNumero() {
-        return "%d".formatted(numero);
+    public int obterNumero() {
+        return numero;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class Lugar {
         return Objects.hash(numero, escalao);
     }
 
-    public String obterEscalao() {
-        return "%d".formatted(escalao);
+    public int obterEscalao() {
+        return escalao;
     }
 }

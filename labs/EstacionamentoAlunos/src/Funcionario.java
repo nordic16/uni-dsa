@@ -30,4 +30,8 @@ public class Funcionario {
     public String obterNome() {
         return nome;
     }
+
+    public int obterEscalao() {
+        return escalao;
+    }
 }
