@@ -77,6 +77,7 @@ public class SequentialSearchST<Key extends Comparable<Key>, Value> implements S
 		return "[" + sj.toString() + "]";
 	}
 
+	// ex5.
 	public Set<Key> keys() {
 		Set<Key> keys = new HashSet<>();
 
@@ -90,6 +91,7 @@ public class SequentialSearchST<Key extends Comparable<Key>, Value> implements S
 		return keys;
 	}
 
+	// ex5.
 	@Override
 	public void delete(Key key) {
 		Node node = first;
