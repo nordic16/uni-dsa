@@ -102,4 +102,48 @@ public class BinarySearchST<Key extends Comparable<Key>, Value> implements ST<Ke
 			queue.add(items[i].key);
 		return queue.iterator();
 	}
+
+	public void mergesort() {
+		mergesort(items, 0, size-1);
+	}
+
+	private void mergesort(Item[] items, int lo, int hi) {
+		if (lo < hi) {
+			int mid = lo + (hi - lo) / 2;
+			mergesort(items, lo, mid);
+			mergesort(items, mid + 1, hi);
+
+			merge(items, lo, mid, hi);
+
+		}
+	}
+
+	private void merge(Item[] items, int lo, int mid, int hi) {
+		Item[] left = (Item[]) new Object[mid - lo + 1];
+		Item[] right = (Item[]) new Object[hi - mid];
+
+		System.arraycopy(items, lo, left, 0, left.length);
+		System.arraycopy(items, mid + 1, right, 0, right.length);
+
+		int i = 0, j = 0, k = lo;
+
+		while (i < left.length && j < right.length) {
+			int cmp = items[i].compareTo(items[j].key);
+			if (cmp > 0) {
+				items[k++] = right[j++];
+			} else {
+				items[k++] = left[i++];
+			}
+		}
+
+		while (i < left.length) {
+			items[k++] = left[i++];
+		}
+
+		while (j < right.length) {
+			items[k++] = left[j++];
+		}
+ 	}
+
+
 }

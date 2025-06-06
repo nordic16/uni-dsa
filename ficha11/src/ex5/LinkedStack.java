@@ -62,18 +62,5 @@ public class LinkedStack<E> extends Stack<E> {
         return size;
     }
 
-    private Node mergesort(Node head) {
-        if (head.next == null) {
-            return head;
-        }
 
-        int mid = size() / 2;
-        Node node = head;
-        for (int i = 0; node.next != null && i < mid; i++) {
-            node = node.next;
-        }
-
-
-        
-    }
 }
